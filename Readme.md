@@ -10,6 +10,10 @@ For full details, please refer to the paper:
 
 ## Installation
 
-Installation follows the standard process for ImageJ plugins. To install, simply copy the .jar file into the <code>plugins</code> folder and restart ImageJ.
+Installation follows the standard process for ImageJ plugins. To install, simply copy the [.jar file](https://github.com/virtual-memory/mtFRC/releases/tag/v0.1.0) into the <code>plugins</code> folder and restart ImageJ.
 
 For further information, see the [official documentation](https://imagej.net/plugins/).
+
+## Tutorial
+
+For usage instructions, please see the [Tutorial](https://github.com/virtual-memory/mtFRC/wiki/Tutorial).
