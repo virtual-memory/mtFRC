@@ -2,7 +2,7 @@
 
 ## Introduction
 
-mtFRC is a tool to quantify resolution as a function of depth in features of 3D microscopy images. It can also be used for 2D images. For further details, please refer to the paper:
+mtFRC is a tool to quantify resolution as a function of depth in features of 3D microscopy images. For further details, please refer to the paper:
 
 > mtFRC: Depth-dependent resolution quantification of image features in 3D fluorescence microscopy
 
