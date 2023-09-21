@@ -11,7 +11,6 @@ public class TiledFRCResult
 	String name;
 	int slicePosition;
 
-
 	// Statistics
 	int numTilesInImage;
 	int numTilesInMaskArea;

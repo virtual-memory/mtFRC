@@ -1,60 +1,54 @@
 package uk.ac.imperial.rowlandslab.imagej;
 
+
+import ij.ImagePlus;
+import ij.gui.NewImage;
+import ij.process.ImageProcessor;
+
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.util.Arrays;
 
 public class Colormap
 {
-	public static BufferedImage generateColormap(FRCResult[][] frcResultMatrix, int numTilesHorizontal, int numTilesVertical)
-	{
-		// Convert FRCResult matrix to double matrix
-
-		double[][] frcMatrix = new double[numTilesVertical][numTilesHorizontal];
-
-		for( int v=0 ; v < frcResultMatrix.length ; v++ )
-		{
-			for( int h=0 ; h < frcResultMatrix[v].length ; h++ )
-			{
-				if( frcResultMatrix[v][h] == null )
-				{
-					continue;
-				}
-
-				frcMatrix[v][h] = frcResultMatrix[v][h].frc;
-			}
-		}
-
-		return generateColormap(frcMatrix, numTilesHorizontal, numTilesVertical);
-	}
-
-
-	public static BufferedImage generateColormap(double[][] frcMatrix, int numTilesHorizontal, int numTilesVertical)
+	public static ImagePlus generateColormap(double[][] frcMatrix, int numTilesHorizontal, int numTilesVertical, double minVal, double maxVal)
 	{
 		// Normalise array
-		double resolutionCutoff = 33; // Change this value to normalise as required
-		double[][] fireMatrixNormalised = normaliseIntArrayWithDynamicRange(frcMatrix, resolutionCutoff);
+		double[][] frcMatrixNormalised = normaliseArray(frcMatrix, minVal, maxVal);
 
 		// Convert double array to int array
-		int[][] fireMatrixInt = doubleArrayToIntArray(fireMatrixNormalised);
+		int[][] frcMatrixInt = doubleArrayToIntArray(frcMatrixNormalised);
 
 		// Flatten array
-		int[] fireMatrixIntFlat = Arrays.stream(fireMatrixInt).flatMapToInt(Arrays::stream).toArray();
+		int[] frcMatrixIntFlat = Arrays.stream(frcMatrixInt).flatMapToInt(Arrays::stream).toArray();
 
 		// Convert array to colormap image
-		BufferedImage colormap = arrayToImage(fireMatrixIntFlat, numTilesHorizontal, numTilesVertical);
+		ImagePlus colormap = arrayToImage(frcMatrixIntFlat, numTilesHorizontal, numTilesVertical);
 
 		return colormap;
 	}
 
-	private static BufferedImage arrayToImage(int[] pixels, int width, int height)
+	private static ImagePlus arrayToImage(int[] pixels, int width, int height)
 	{
-		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);
+		if (width <= 0 || height <= 0 || pixels == null || pixels.length != width * height)
+		{
+			throw new IllegalArgumentException("arrayToImage: Invalid input parameters.");
+		}
 
-		WritableRaster wr = image.getRaster();
-		wr.setPixels(0, 0, width, height, pixels);
+		// Create a new black ImagePlus with 16-bit grayscale.
+		ImagePlus image = NewImage.createImage("image", width, height, 1, 16, NewImage.FILL_BLACK);
 
-		image.setData(wr); // TEST
+		// Get the ImageProcessor from the ImagePlus.
+		ImageProcessor ip = image.getProcessor();
+
+		for (int y = 0; y < height; y++)
+		{
+			for (int x = 0; x < width; x++)
+			{
+				int pixelValue = pixels[y * width + x];
+				ip.putPixelValue(x, y, pixelValue);
+			}
+		}
 
 		return image;
 	}
@@ -74,9 +68,11 @@ public class Colormap
 		return intArray;
 	}
 
-	private static double[][] normaliseIntArrayWithDynamicRange(double[][] originalArray, double resolutionCutoff)
+	private static double[][] normaliseArray(double[][] originalArray, double minVal, double maxVal)
 	{
-		double normalisedMax = 255;
+		double normalisedMin = 0;
+		double normalisedMax = 65535; // For 16-bit images
+		double scaleFactor = (normalisedMax - normalisedMin) / (maxVal - minVal);
 
 		double[][] normalisedArray = new double[originalArray.length][originalArray[0].length];
 
@@ -84,13 +80,6 @@ public class Colormap
 		{
 			for (int j = 0; j < originalArray[0].length; j++)
 			{
-				// Set to normalised max if resolution greater than cutoff
-				if (originalArray[i][j] > resolutionCutoff)
-				{
-					normalisedArray[i][j] = normalisedMax;
-					continue;
-				}
-
 				// Set to normalised max if value is -1 (meaning 'no correlations')
 				if (originalArray[i][j] < 0)
 				{
@@ -98,11 +87,20 @@ public class Colormap
 					continue;
 				}
 
-				double normalisedVal = (originalArray[i][j] / resolutionCutoff) * normalisedMax;
+				double normalisedVal = (originalArray[i][j] - minVal) * scaleFactor;
+
+				// Limit normalised value if less than the minimum
+				if( normalisedVal < normalisedMin )
+				{
+					normalisedVal = normalisedMin;
+				}
+
+				// Limit normalised value if greater than the maximum
 				if( normalisedVal > normalisedMax )
 				{
 					normalisedVal = normalisedMax;
 				}
+
 				normalisedArray[i][j] = normalisedVal;
 			}
 		}

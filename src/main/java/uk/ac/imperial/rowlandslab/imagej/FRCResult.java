@@ -45,4 +45,27 @@ public class FRCResult
 				break;
 		}
 	}
+
+	public static double[][] convertFrcResultMatrixToDoubleMatrix(FRCResult[][] frcResultMatrix)
+	{
+		int numTilesVertical = frcResultMatrix.length;
+		int numTilesHorizontal = frcResultMatrix[0].length;
+
+		double[][] frcMatrix = new double[numTilesVertical][numTilesHorizontal];
+
+		for( int v=0 ; v < numTilesVertical ; v++ )
+		{
+			for( int h=0 ; h < numTilesHorizontal ; h++ )
+			{
+				if( frcResultMatrix[v][h] == null )
+				{
+					continue;
+				}
+
+				frcMatrix[v][h] = frcResultMatrix[v][h].frc;
+			}
+		}
+
+		return frcMatrix;
+	}
 }

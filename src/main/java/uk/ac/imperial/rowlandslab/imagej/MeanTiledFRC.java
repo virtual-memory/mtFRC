@@ -8,18 +8,18 @@ import java.awt.image.BufferedImage;
 
 public class MeanTiledFRC
 {
-	public static TiledFRCResult runMeanTiledFRCSingleImage(ImageProcessor imgIp, String imageType, ImageProcessor maskIp, String name, int slicePosition, int tileWidth, int tileHeight, double pixelSize)
+	public static TiledFRCResult runMeanTiledFRCSingleImage(ImageProcessor imgIp, String imageType, ImageProcessor maskIp, String name, int slicePosition, int tileWidth, int tileHeight)
 	{
 		// Split image into four sub-images
 		ImagePlus[] imgArray = ImageUtils.splitImage(imgIp, imageType);
 
-		// // Get sub-image dimensions
+		// Get sub-image dimensions
 		ImageProcessor ip = imgArray[0].getProcessor();
 		int singleImgWidth = ip.getWidth();
 		int singleImgHeight = ip.getHeight();
 
 		// Resize mask
-		BufferedImage subImageMask = ImageUtils.resizeImage(maskIp, singleImgWidth, singleImgHeight);
+		BufferedImage subImageMask = ImageUtils.resizeImage(maskIp, singleImgWidth, singleImgHeight, BufferedImage.TYPE_BYTE_GRAY);
 
 		// Get sub-image image processors
 		ImageProcessor ip1 = imgArray[0].getProcessor();

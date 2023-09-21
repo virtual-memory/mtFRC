@@ -70,16 +70,16 @@ public class ImageUtils
 
 		return imageCropped;
 	}
-	public static BufferedImage resizeImage(ImageProcessor ip, int targetWidth, int targetHeight)
+	public static BufferedImage resizeImage(ImageProcessor ip, int targetWidth, int targetHeight, int imageType)
 	{
 		BufferedImage inputImage = ip.getBufferedImage();
-		return resizeImage(inputImage, targetWidth, targetHeight);
+		return resizeImage(inputImage, targetWidth, targetHeight, imageType);
 	}
 
-	public static BufferedImage resizeImage(BufferedImage inputImage, int targetWidth, int targetHeight)
+	public static BufferedImage resizeImage(BufferedImage inputImage, int targetWidth, int targetHeight, int imageType)
 	{
 		Image scaledImage = inputImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_DEFAULT);
-		BufferedImage outputImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_BYTE_GRAY);
+		BufferedImage outputImage = new BufferedImage(targetWidth, targetHeight, imageType);
 		outputImage.getGraphics().drawImage(scaledImage, 0, 0, null);
 		return outputImage;
 	}
@@ -116,6 +116,16 @@ public class ImageUtils
 		// Get image dimensions
 		int imgWidth = ip.getWidth();
 		int imgHeight = ip.getHeight();
+
+		// If width or height is an odd number, ignore the last row/column of pixels
+		if( imgWidth % 2 == 1 )
+		{
+			imgWidth -= 1;
+		}
+		if( imgHeight % 2 == 1 )
+		{
+			imgHeight -= 1;
+		}
 
 		ImagePlus split1 = IJ.createImage("Split 1", imageType, imgWidth/2, imgHeight/2, 1);
 		ImagePlus split2 = IJ.createImage("Split 2", imageType, imgWidth/2, imgHeight/2, 1);

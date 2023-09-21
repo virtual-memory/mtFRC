@@ -12,20 +12,20 @@
 		<relativePath />
 	</parent>
 
-	<groupId>uk.ac.imperial.rowlandslab</groupId>        <!-- FIXME: Your organization groupId here -->
-	<artifactId>MT_FRC</artifactId> <!-- FIXME: Your project artifactId here   -->
-	<version>0.1.0-SNAPSHOT</version>
+	<groupId>uk.ac.imperial.rowlandslab</groupId>
+	<artifactId>MT_FRC</artifactId>
+	<version>0.2.0-SNAPSHOT</version>
 
-	<name>mtFRC</name>                                                   <!-- FIXME: Your project name here          -->
-	<description>Depth-dependent resolution quantification of image features</description> <!-- FIXME: Your project description here   -->
-	<url>https://www.imperial.ac.uk/rowlands-lab/resources/</url>                       <!-- FIXME: Your project website here       -->
-	<inceptionYear>2023</inceptionYear>                                           <!-- FIXME: Your project starting year here -->
+	<name>mtFRC</name>
+	<description>Depth-dependent resolution quantification of image features</description>
+	<url>https://www.imperial.ac.uk/rowlands-lab/resources/</url>
+	<inceptionYear>2023</inceptionYear>
 	<organization>
-		<name>Rowlands Lab</name>           <!-- FIXME: Your organization name here    -->
-		<url>https://www.imperial.ac.uk/rowlands-lab</url> <!-- FIXME: Your organization website here -->
+		<name>Rowlands Lab</name>
+		<url>https://www.imperial.ac.uk/rowlands-lab</url>
 	</organization>
 	<licenses>
-		<license>                         <!-- FIXME: Your license here -->
+		<license>
 			<name>CCby</name>
 			<url>https://creativecommons.org/licenses/by/4.0/</url>
 			<distribution>repo</distribution>
@@ -35,9 +35,9 @@
 	<developers>
 		<!-- See https://imagej.net/contribute/governance#scijava-team-roles -->
 		<developer>
-			<id>rowlandslab</id>                                          <!-- FIXME: Your GitHub handle here -->
-			<name>Rowlands Lab</name>                            <!-- FIXME: Your name here          -->
-			<url>https://www.imperial.ac.uk/rowlands-lab</url> <!-- FIXME: Your website here       -->
+			<id>rowlandslab</id>
+			<name>Rowlands Lab</name>
+			<url>https://www.imperial.ac.uk/rowlands-lab</url>
 			<roles>
 				<role>founder</role>
 				<role>lead</role>
@@ -77,10 +77,10 @@
 	</ciManagement>
 
 	<properties>
-		<package-name>uk.ac.imperial.rowlandslab.imagej</package-name>                   <!-- FIXME: Your project package prefix here -->
-		<main-class>uk.ac.imperial.rowlandslab.imagej.MT_FRC</main-class>        <!-- FIXME: Your project main class here, or delete for none -->
-		<license.licenseName>cc-by</license.licenseName>                      <!-- FIXME: Your license-maven-plugin license code here -->
-		<license.copyrightOwners>Rowlands Lab</license.copyrightOwners> <!-- FIXME: Your organization legal entity name here -->
+		<package-name>uk.ac.imperial.rowlandslab.imagej</package-name>
+		<main-class>uk.ac.imperial.rowlandslab.imagej.MT_FRC</main-class>
+		<license.licenseName>cc-by</license.licenseName>
+		<license.copyrightOwners>Rowlands Lab</license.copyrightOwners>
 	</properties>
 
 	<dependencies>
