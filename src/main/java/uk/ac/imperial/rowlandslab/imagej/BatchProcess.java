@@ -294,8 +294,10 @@ public class BatchProcess
 		Font font = new Font("SansSerif", Font.PLAIN, 14);
 		ip.setFont(font);
 		ip.setColor(Color.white);
-		ip.drawString("≤" + String.valueOf(min), 10, 20);
-		ip.drawString("≥" + String.valueOf(max), width - 40, 20);
+		String leftString = min > 0 ? "≤" + String.valueOf(min) : String.valueOf(min);
+		String rightString = "≥" + String.valueOf(max);
+		ip.drawString(leftString, 10, 20);
+		ip.drawString(rightString, width - 40, 20);
 
 		// Show the image
 		colorBarImage.show();
