@@ -59,10 +59,8 @@ public class ImageUtils
 		return arr;
 	}
 
-	public static ImagePlus generateTile(ImagePlus image, int startX, int startY, int tileWidth, int tileHeight)
+	public static ImagePlus generateTile(ImageProcessor ip, int startX, int startY, int tileWidth, int tileHeight)
 	{
-		ImageProcessor ip = image.getProcessor();
-
 		ip.setRoi(startX, startY, tileWidth, tileHeight);
 		ImageProcessor croppedIp = ip.crop();
 

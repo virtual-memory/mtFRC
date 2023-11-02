@@ -18,8 +18,9 @@ public class TiledFRCResult
 	int numDetectedResolutionTiles;
 	int numUndetectedResolutionTiles;
 	double percentageUndetectedResolutionTiles;
+	double minFrc;
 
-	public TiledFRCResult(FRCResult[][] frcArray, double meanTiledFrc, String name, int slicePosition, int numTilesInImage, int numTilesInMaskArea, double percentageTilesInMask, int numDetectedResolutionTiles, int numUndetectedResolutionTiles, double percentageUndetectedResolutionTiles)
+	public TiledFRCResult(FRCResult[][] frcArray, double meanTiledFrc, String name, int slicePosition, int numTilesInImage, int numTilesInMaskArea, double percentageTilesInMask, int numDetectedResolutionTiles, int numUndetectedResolutionTiles, double percentageUndetectedResolutionTiles, double minFrc)
 	{
 		this.frcArray = frcArray;
 		this.meanTiledFrc = meanTiledFrc;
@@ -33,5 +34,7 @@ public class TiledFRCResult
 		this.numDetectedResolutionTiles = numDetectedResolutionTiles;
 		this.numUndetectedResolutionTiles = numUndetectedResolutionTiles;
 		this.percentageUndetectedResolutionTiles = percentageUndetectedResolutionTiles;
+
+		this.minFrc = minFrc;
 	}
 }

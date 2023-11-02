@@ -24,7 +24,7 @@ import ij.process.ImageProcessor;
 
 public class BatchProcess
 {
-	public static void batchMeanTiledFRC(boolean useRois, int tileWidth, int tileHeight, double originalImagePixelSize, double stepSize, boolean isShowPlotEnabled, boolean isGenerateColormapsEnabled, double colormapUmMin, double colormapUmMax)
+	public static void batchMeanTiledFRC(boolean useSingleImageAnalysis, boolean useRois, int tileWidth, int tileHeight, double originalImagePixelSize, double stepSize, boolean isShowPlotEnabled, boolean isGenerateColormapsEnabled, double colormapUmMin, double colormapUmMax)
 	{
 		// Get current image stack
 		ImagePlus ip = IJ.getImage();
@@ -42,16 +42,24 @@ public class BatchProcess
 			// If set to analyse whole image, generate an ROI covering the full frame for each frame in the stack
 
 			ImagePlus image = IJ.getImage();
-			int numFrames = image.getStackSize();
+			int numSlices = image.getNSlices();
 
-			rois = new Roi[numFrames];
+			rois = new Roi[numSlices];
 
-			for (int i = 0; i < numFrames; i++)
+			//int nChannels = ip.getNChannels();
+			int channel = 1;
+			int frame = 1;
+
+			for (int sliceIndex = 1; sliceIndex <= numSlices; sliceIndex++)
 			{
 				Roi roi = new Roi(0, 0, image.getWidth(), image.getHeight());
-				roi.setPosition(i+1);
-				roi.setName("Full Frame " + (i+1));
-				rois[i] = roi;
+
+//				int position = ((sliceIndex - 1) * nChannels) + channel;
+//				roi.setPosition(position);
+				roi.setPosition(channel, sliceIndex, frame);
+
+				roi.setName("Full Frame " + sliceIndex);
+				rois[sliceIndex-1] = roi;
 			}
 		}
 
@@ -77,7 +85,7 @@ public class BatchProcess
 					Roi roi = rois[i];
 
 					// Get the associated slice position for the ROI
-					int slicePosition = roi.getPosition();
+					int slicePosition = roi.getZPosition();
 
 					// If slice not set, set to 1
 					if (slicePosition == 0)
@@ -85,14 +93,43 @@ public class BatchProcess
 						slicePosition = 1;
 					}
 
-					// Get slice
-					ImageProcessor sliceIp = ip.getStack().getProcessor(slicePosition);
-
-					// Get mask
-					ImageProcessor maskIp = ImageUtils.roiToMask(roi, sliceIp).getProcessor();
 
 					// Run mtFRC and add result to list
-					TiledFRCResult result = MeanTiledFRC.runMeanTiledFRCSingleImage(sliceIp, imageType, maskIp, roi.getName(), slicePosition, tileWidth, tileHeight);
+					TiledFRCResult result;
+					if( useSingleImageAnalysis )
+					{
+						// Get image processor for slice
+						int nChannels = ip.getNChannels();
+						int slice = slicePosition;
+						int channel = 1;
+						int position = ((slice - 1) * nChannels) + channel;
+						ImageProcessor sliceIp = ip.getStack().getProcessor(position);
+
+						// Get mask
+						ImageProcessor maskIp = ImageUtils.roiToMask(roi, sliceIp).getProcessor();
+
+						result = MeanTiledFRC.runMeanTiledFRCSingleImage(sliceIp, imageType, maskIp, roi.getName(), slicePosition, tileWidth, tileHeight);
+					}
+					else
+					{
+						// Get image processor for slice from channel 1
+						int nChannels = ip.getNChannels();
+						int slice = slicePosition;
+						int channel = 1;
+						int position = ((slice - 1) * nChannels) + channel;
+						ImageProcessor sliceIp1 = ip.getStack().getProcessor(position);
+
+						// Get image processor for slice from channel 2
+						channel = 2;
+						position = ((slice - 1) * nChannels) + channel;
+						ImageProcessor sliceIp2 = ip.getStack().getProcessor(position);
+
+						// Get mask
+						ImageProcessor maskIp = ImageUtils.roiToMask(roi, sliceIp1).getProcessor();
+
+						result = MeanTiledFRC.runMeanTiledFRCTwoImage(sliceIp1, sliceIp2, imageType, maskIp, roi.getName(), slicePosition, tileWidth, tileHeight);
+					}
+
 					results.add(result);
 
 					try
@@ -129,7 +166,7 @@ public class BatchProcess
 				IJ.showStatus("");
 				IJ.showProgress(1.0);
 
-				showResultsTable(results, originalImagePixelSize, stepSize);
+				showResultsTable(useSingleImageAnalysis, results, originalImagePixelSize, stepSize);
 
 				if(isShowPlotEnabled)
 				{
@@ -140,19 +177,28 @@ public class BatchProcess
 					}
 					else
 					{
-						showResultsPlot(results, originalImagePixelSize, stepSize);
+						showResultsPlot(useSingleImageAnalysis, results, originalImagePixelSize, stepSize);
 					}
 				}
 
 				if(isGenerateColormapsEnabled)
 				{
-					int numTilesHorizontal = ip.getWidth() / (2 * tileWidth);
-					int numTilesVertical = ip.getHeight() / (2 * tileHeight);
+					int numTilesHorizontal = ip.getWidth() / tileWidth;
+					int numTilesVertical = ip.getHeight() / tileHeight;
 
-					int colormapWidth = ip.getWidth() / 2;
-					int colormapHeight = ip.getHeight() / 2;
+					int colormapWidth = ip.getWidth();
+					int colormapHeight = ip.getHeight();
 
-					generateColormaps(results, numTilesHorizontal, numTilesVertical, colormapWidth, colormapHeight, colormapUmMin, colormapUmMax, originalImagePixelSize);
+					if( useSingleImageAnalysis )
+					{
+						numTilesHorizontal /= 2;
+						numTilesVertical /= 2;
+
+						colormapWidth /= 2;
+						colormapHeight /= 2;
+					}
+
+					generateColormaps(useSingleImageAnalysis, results, numTilesHorizontal, numTilesVertical, colormapWidth, colormapHeight, colormapUmMin, colormapUmMax, originalImagePixelSize);
 				}
 			}
 		};
@@ -160,9 +206,14 @@ public class BatchProcess
 		worker.execute();
 	}
 
-	private static void showResultsTable(ArrayList<TiledFRCResult> results, double originalImagePixelSize, double stepSize)
+	private static void showResultsTable(boolean useSingleImageAnalysis, ArrayList<TiledFRCResult> results, double originalImagePixelSize, double stepSize)
 	{
-		double subImagePixelSize = originalImagePixelSize * 2;
+		// Convert pixel size to sub-image pixel size if using Single Image analysis
+		double appliedImagePixelSize = originalImagePixelSize;
+		if( useSingleImageAnalysis )
+		{
+			appliedImagePixelSize *= 2;
+		}
 
 		ResultsTable rt = Analyzer.getResultsTable();
 		if (rt == null)
@@ -174,8 +225,16 @@ public class BatchProcess
 		for( TiledFRCResult result : results )
 		{
 			double depth = result.slicePosition * stepSize;
-			double mtFRCPixels = result.meanTiledFrc * 2; // Convert 'sub-image pixels' to 'original image pixels'
-			double mtFrcUm = result.meanTiledFrc * subImagePixelSize;
+
+			double mtFRCPixels = result.meanTiledFrc;
+
+			// For Single Image analysis, convert 'sub-image pixels' to 'original image pixels'
+			if( useSingleImageAnalysis )
+			{
+				mtFRCPixels *= 2;
+			}
+
+			double mtFrcUm = result.meanTiledFrc * appliedImagePixelSize;
 
 			rt.incrementCounter();
 			rt.addValue("ROI", result.name);
@@ -188,9 +247,14 @@ public class BatchProcess
 		rt.show("Results");
 	}
 
-	private static void showResultsPlot(ArrayList<TiledFRCResult> results, double originalImagePixelSize, double stepSize)
+	private static void showResultsPlot(boolean useSingleImageAnalysis, ArrayList<TiledFRCResult> results, double originalImagePixelSize, double stepSize)
 	{
-		double subImagePixelSize = originalImagePixelSize * 2;
+		// Convert pixel size to sub-image pixel size if using Single Image analysis
+		double appliedImagePixelSize = originalImagePixelSize;
+		if( useSingleImageAnalysis )
+		{
+			appliedImagePixelSize *= 2;
+		}
 
 		// Sort results according to slice position
 		Collections.sort(results, new Comparator<TiledFRCResult>()
@@ -220,7 +284,7 @@ public class BatchProcess
 			double depth = result.slicePosition * stepSize;
 			xVals.add(depth);
 
-			double mtFrcUm = result.meanTiledFrc * subImagePixelSize;
+			double mtFrcUm = result.meanTiledFrc * appliedImagePixelSize;
 			yVals.add(mtFrcUm);
 		}
 
@@ -231,12 +295,19 @@ public class BatchProcess
 		plot.show();
 	}
 
-	private static void generateColormaps(ArrayList<TiledFRCResult> results, int numTilesHorizontal, int numTilesVertical, int colormapWidth, int colormapHeight, double colormapUmMin, double colormapUmMax, double originalImagePixelSize)
+	private static void generateColormaps(boolean useSingleImageAnalysis, ArrayList<TiledFRCResult> results, int numTilesHorizontal, int numTilesVertical, int colormapWidth, int colormapHeight, double colormapUmMin, double colormapUmMax, double originalImagePixelSize)
 	{
+		double appliedPixelSize = originalImagePixelSize;
+
+		// Convert pixel size to sub-image pixel size if using Single Image analysis
+		if( useSingleImageAnalysis )
+		{
+			appliedPixelSize *= 2;
+		}
+
 		// Get min and max values for entire result set
-		double subImagePixelSize = originalImagePixelSize * 2;
-		double colorMapPixelsMin = colormapUmMin / subImagePixelSize;
-		double colorMapPixelsMax = colormapUmMax / subImagePixelSize;
+		double colorMapPixelsMin = colormapUmMin / appliedPixelSize;
+		double colorMapPixelsMax = colormapUmMax / appliedPixelSize;
 
 		ImageStack stack = new ImageStack(colormapWidth, colormapHeight);
 
@@ -246,7 +317,7 @@ public class BatchProcess
 			double[][] frcMatrix = FRCResult.convertFrcResultMatrixToDoubleMatrix(result.frcArray);
 			ImagePlus colormap = Colormap.generateColormap(frcMatrix, numTilesHorizontal, numTilesVertical, colorMapPixelsMin, colorMapPixelsMax);
 
-			// Resize colormap to size of sub-image
+			// Resize colormap to size of sub-image (Single Image analysis) or original image (Two Image analysis)
 			ImageProcessor ip = colormap.getProcessor();
 			ip = ip.resize(colormapWidth, colormapHeight);
 			ImagePlus resizedColormap = new ImagePlus("Resized Colormap", ip);
