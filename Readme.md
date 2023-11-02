@@ -10,7 +10,7 @@ mtFRC is a tool to quantify resolution as a function of depth in features of 3D 
 
 Installation follows the standard process for ImageJ plugins.
 
-First, download the plugin .jar file from [here](https://github.com/virtual-memory/mtFRC/releases/download/v0.2.0/MT_FRC-0.2.0.jar).
+First, download the plugin .jar file from [here](https://github.com/virtual-memory/mtFRC/releases/download/v0.3.0/MT_FRC-0.3.0.jar).
 
 Then, simply copy the .jar file into ImageJ's <code>plugins</code> folder. When ImageJ is restarted, the plugin should be available.
 
