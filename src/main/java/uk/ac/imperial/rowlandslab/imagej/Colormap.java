@@ -1,6 +1,7 @@
 package uk.ac.imperial.rowlandslab.imagej;
 
 
+import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.NewImage;
 import ij.process.ImageProcessor;

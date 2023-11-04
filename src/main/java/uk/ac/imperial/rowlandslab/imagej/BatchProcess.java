@@ -339,6 +339,9 @@ public class BatchProcess
 		String lut = "Fire";
 		IJ.run(imagePlus, lut, "");
 
+		// Invert LUT
+		IJ.run(imagePlus, "Invert LUT", "");
+
 		generateColorScaleBar(lut, colormapUmMin, colormapUmMax);
 	}
 
@@ -351,10 +354,17 @@ public class BatchProcess
 
 		ImageProcessor ip = colorBarImage.getProcessor();
 
+		// Set the display range to include 255.0 as white
+		ip.setMinAndMax(0.0, 255.0);
+
+		// Fill the image with white using the maximum value of the display range
+		ip.setValue(255.0);
+		ip.fill();
+
 		// Generate grayscale bar
 		for (int x = 0; x < width; x++)
 		{
-			float grayValue = (float) x / (width - 1);
+			float grayValue = x;
 			for (int y = 25; y < 35; y++)
 			{
 				ip.putPixelValue(x, y, grayValue);
@@ -364,20 +374,23 @@ public class BatchProcess
 		// Display numerical values
 		Font font = new Font("SansSerif", Font.PLAIN, 14);
 		ip.setFont(font);
-		ip.setColor(Color.white);
+		ip.setColor(Color.black);
 		String leftString = min > 0 ? "≤" + String.valueOf(min) : String.valueOf(min);
 		String rightString = "≥" + String.valueOf(max);
 		ip.drawString(leftString, 10, 20);
 		ip.drawString(rightString, width - 40, 20);
 
-		// Show the image
-		colorBarImage.show();
+		// Update the image with the new display range
+		colorBarImage.updateAndDraw();
 
 		// Show the image
 		colorBarImage.show();
 
 		// Apply LUT
 		IJ.run(colorBarImage, lutName, "");
+
+		// Invert LUT
+		IJ.run(colorBarImage, "Invert LUT", "");
 	}
 
 }

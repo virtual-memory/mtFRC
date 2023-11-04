@@ -57,8 +57,10 @@ public class FRCResult
 		{
 			for( int h=0 ; h < numTilesHorizontal ; h++ )
 			{
+				// Pixel not in ROI
 				if( frcResultMatrix[v][h] == null )
 				{
+					frcMatrix[v][h] = Double.MAX_VALUE;
 					continue;
 				}
 
